@@ -2,10 +2,12 @@ const express = require("express")
 const mongoose = require("mongoose")
 const chalk = require("chalk")
 const helmet = require ("helmet")
+const cors  = require('cors')
 const morgan = require ("morgan")
 const userRoute = require("./routes/users")
 const authRoute = require("./routes/auth")
 const postRoute = require("./routes/posts")
+const path = require("path");
 require ("dotenv").config()
 
 const server = express()
@@ -17,10 +19,18 @@ mongoose.connect(process.env.MONGO_URL)
 server.use(helmet())
 server.use(express.json())
 server.use(morgan("common"))
-
+server.use(cors())
 server.use("/api/users", userRoute)
 server.use("/api/auth", authRoute)
 server.use("/api/posts", postRoute)
+
+
+server.use(express.static(path.join(__dirname,"./client/build")))
+
+server.get("*",(req,res)=>{
+    res.sendFile(path.join(__dirname + "/client/build/index.html"))
+})
+
 
 const port = 8080
 server.listen(process.env.PORT || port, ()=> {
